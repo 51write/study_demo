@@ -3,7 +3,7 @@
 from langchain_community.chat_models import QianfanChatEndpoint
 from langchain.chains import LLMChain
 from langchain.prompts import ChatPromptTemplate
-from pydantic import BaseModel, Field
+from schema import PersonalDetails
 from enum import Enum
 #from langchain.chains.openai_functions import(
 #    create_tagging_chain,
@@ -35,28 +35,6 @@ def getOpenAI():
     )
     print(completion.choices[0].message)
 
-## schema文件
-## function的注释要写上，不然有出现以下错误code: 336003, msg: functions description can't be blank
-class PersonalDetails(BaseModel):
-    """
-    PersonalDetails 模型用于存储个人的详细信息。
-
-    包含以下字段：
-    - name: 姓名
-    - city: 城市
-    - email: 电子邮件地址
-    """
-    #定义数据的类型
-    name:  str = Field(
-        description="这是用户输入的名字"
-    )
-    city: str = Field(
-        description="这是用户输入的居住城市"
-    )
-    email:str = Field(
-        description="这是用户输入的邮箱地址"
-    )
-
 def getQianFanModel():
     qianfan_api_key = os.environ['QIANFAN_API_KEY']
     qianfan_secret_key= os.environ['QIANFAN_SECRET_KEY']
@@ -75,13 +53,15 @@ def getQianFanModel():
 #from langchain_core.utils.function_calling import convert_to_openai_tool
 #dict_schema = convert_to_openai_tool(PersonalDetails)
 
-llm = getQianFanModel()
-structured_llm = llm.with_structured_output(PersonalDetails)#调试的时候建议,include_raw=True
+def get_structured_llm():
+    llm = getQianFanModel()
+    structured_llm = llm.with_structured_output(PersonalDetails)#调试的时候建议,include_raw=True
+    return structured_llm
 
-test_str1 = "你好，我是黄国华，我住在深圳福田，我的邮箱是jeremy_h_shenzhen@163.com,请告诉我我的个人信息"
+#test_str1 = "你好，我是黄国华，我住在深圳福田，我的邮箱是jeremy_h_shenzhen@163.com,请告诉我我的个人信息"
 #try:
-#test_res1 = chain.invoke(input = test_str1)
-test_res1=structured_llm.invoke(test_str1)
-print(test_res1)
+#test_res1=get_structured_llm().invoke(test_str1)
+#print(test_res1)
 #except OutputParserException as e:
 #    print(f"OutputParserException: {e}")
+
